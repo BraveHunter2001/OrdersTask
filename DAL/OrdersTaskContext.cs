@@ -11,6 +11,10 @@ public class OrdersTaskContext : DbContext
     public DbSet<Item> Items { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
 
+    public OrdersTaskContext(DbContextOptions<OrdersTaskContext> options) : base(options)
+    {
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>().Property(u => u.Role).HasConversion<string>();
@@ -19,6 +23,7 @@ public class OrdersTaskContext : DbContext
         //настройка наследования таблиц
         modelBuilder.Entity<User>()
             .HasDiscriminator(u => u.Role)
+            .HasValue<User>(UserRole.Manager)
             .HasValue<Customer>(UserRole.Customer);
 
         modelBuilder.Entity<OrderItem>()
