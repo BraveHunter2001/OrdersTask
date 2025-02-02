@@ -1,0 +1,19 @@
+version: '3.4'
+
+volumes:
+    postgres:
+
+services:
+    postgres: 
+        container_name: orderstaskdb
+        image: 'postgres:latest'
+        environment:
+            POSTGRES_USER: pgadmin
+            POSTGRES_PASSWORD: pgadmin
+            PGDATA: /data/postgres
+            POSTGRES_DB: OrdersTaskdb
+        volumes:
+            - postgres:/data/postgres
+        ports:
+            - "5432:5432"
+        restart: always
