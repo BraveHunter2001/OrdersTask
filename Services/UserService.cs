@@ -8,6 +8,7 @@ namespace Services;
 public interface IUserService
 {
     User CreateUser(CreationUserDto model);
+    User? GetUserByLogin(string login);
 }
 
 internal class UserService(IUnitOfWork uow) : IUserService
@@ -26,6 +27,8 @@ internal class UserService(IUnitOfWork uow) : IUserService
 
         return user;
     }
+
+    public User? GetUserByLogin(string login) => uow.UserRepository.GetUserByLogin(login);
 
     private void CreateCustomer(Customer customer)
     {

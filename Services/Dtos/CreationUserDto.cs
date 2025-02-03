@@ -9,7 +9,8 @@ public class CreationUserDto
     public UserRole Role { get; set; }
     public string? Name { get; set; }
     public string? Address { get; set; }
+    public decimal? Discount { get; set; }
 
     public User ToUser() => new(Login, Password, Role);
-    public Customer ToCustomer() => new(Login, Password, Role, Name, Address);
+    public Customer ToCustomer() => new(Login, Password, Role, Name, Address, Discount);
 }

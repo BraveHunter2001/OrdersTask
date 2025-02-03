@@ -6,7 +6,7 @@ namespace DAL;
 
 public interface IUnitOfWork
 {
-    IRepository<User> UserRepository { get; }
+    IUserRepository UserRepository { get; }
     IRepository<Customer> CustomerRepository { get; }
 
     ISequence<int> Sequence { get; }
@@ -16,12 +16,12 @@ public interface IUnitOfWork
 
 internal class UnitOfWork(OrdersTaskContext context) : IUnitOfWork, IDisposable
 {
-    private IRepository<User> _userRepository;
+    private IUserRepository _userRepository;
     private IRepository<Customer> _customerRepository;
 
     private ISequence<int> _sequence;
 
-    public IRepository<User> UserRepository => _userRepository ??= new Repository<User>(context);
+    public IUserRepository UserRepository => _userRepository ??= new UserRepository(context);
     public IRepository<Customer> CustomerRepository => _customerRepository ??= new Repository<Customer>(context);
 
     public ISequence<int> Sequence => _sequence ??= new Sequence<int>(context);
