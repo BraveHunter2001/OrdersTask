@@ -1,4 +1,5 @@
 using DAL;
+using Services;
 
 namespace WebApi
 {
@@ -7,9 +8,10 @@ namespace WebApi
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
             string connectionString = builder.Configuration.GetValue<string>("ConnectionString")!;
+
             builder.Services.AddDAL(connectionString);
+            builder.Services.AddServices();
 
             builder.Services.AddControllers();
 
@@ -17,7 +19,6 @@ namespace WebApi
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
             app.Run();

@@ -1,4 +1,5 @@
 ﻿using DAL.Entities;
+using DAL.Secuenser;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL;
@@ -37,6 +38,12 @@ public class OrdersTaskContext : DbContext
         modelBuilder.Entity<Order>().Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
         modelBuilder.Entity<Item>().Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
         modelBuilder.Entity<OrderItem>().Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
+
+        modelBuilder
+            .HasSequence<int>(nameof(SequenceType.CustomerSequence))
+            .StartsAt(1)
+            .IncrementsBy(1)
+            .HasMax(int.MaxValue);
 
         base.OnModelCreating(modelBuilder);
     }
