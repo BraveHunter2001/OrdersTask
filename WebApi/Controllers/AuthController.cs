@@ -1,4 +1,5 @@
 ﻿using DAL.Entities;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,15 +12,24 @@ namespace WebApi.Controllers;
 
 [Route("api/[controller]/")]
 [ApiController]
-public class AuthController(IUserService userService) : ControllerBase
+public class AuthController(
+    IUserService userService,
+    IValidator<UserDto> validator
+) : ControllerBase
 {
     [HttpPost("registration")]
-    public IActionResult Registration([FromBody] CreationUserDto model)
+    public IActionResult Registration([FromBody] UserDto model)
     {
-        // TODO: валидация
+        var results = validator.Validate(model);
+        if (!results.IsValid)
+            return BadRequest(results.Errors
+                .Select(e => e.ErrorMessage)
+                .ToArray()
+            );
 
         User user = userService.CreateUser(model);
 
+        //todo: добавить редирект
         return Ok(user.Id);
     }
 

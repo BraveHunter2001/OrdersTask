@@ -9,7 +9,7 @@ internal class Repository<TEntity>(OrdersTaskContext context) : IRepository<TEnt
 
     private bool disposed = false;
 
-    public virtual TEntity GetById(object id) => dbSet.Find(id);
+    public virtual TEntity GetById(object id, bool readOnly = true) => dbSet.Find(id);
 
     public virtual void Insert(TEntity entity) => dbSet.Add(entity);
 

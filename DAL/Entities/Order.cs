@@ -14,7 +14,7 @@ public class Order
     public OrderStatus Status { get; set; }
 
     public Guid CustomerId { get; set; }
-    public required Customer Customer { get; set; }
+    public Customer Customer { get; set; }
 
     public ICollection<OrderItem> OrderItems { get; set; }
 }

@@ -1,15 +1,17 @@
 ﻿using DAL.Entities;
 using DAL.Repositories;
-using DAL.Secuenser;
+using DAL.Sequenser;
+using Microsoft.EntityFrameworkCore;
 
 namespace DAL;
 
 public interface IUnitOfWork
 {
     IUserRepository UserRepository { get; }
-    IRepository<Customer> CustomerRepository { get; }
-
-    ISequence<int> Sequence { get; }
+    ICustomerRepository CustomerRepository { get; }
+    IRepository<Order> OrderRepository { get; }
+    IItemRepository ItemRepository { get; }
+    T GetNextValueSequence<T>(SequenceType sequenceType);
 
     void Save();
 }
@@ -17,14 +19,20 @@ public interface IUnitOfWork
 internal class UnitOfWork(OrdersTaskContext context) : IUnitOfWork, IDisposable
 {
     private IUserRepository _userRepository;
-    private IRepository<Customer> _customerRepository;
-
-    private ISequence<int> _sequence;
+    private ICustomerRepository _customerRepository;
+    private IItemRepository _itemRepository;
+    private IRepository<Order> _orderRepository;
 
     public IUserRepository UserRepository => _userRepository ??= new UserRepository(context);
-    public IRepository<Customer> CustomerRepository => _customerRepository ??= new Repository<Customer>(context);
+    public ICustomerRepository CustomerRepository => _customerRepository ??= new CustomerRepository(context);
+    public IItemRepository ItemRepository => _itemRepository ??= new ItemRepository(context);
+    public IRepository<Order> OrderRepository => _orderRepository ??= new Repository<Order>(context);
 
-    public ISequence<int> Sequence => _sequence ??= new Sequence<int>(context);
+    public T GetNextValueSequence<T>(SequenceType sequenceType)
+    {
+        string sql = $"select nextval('\"{sequenceType.ToString()}\"')";
+        return context.Database.SqlQueryRaw<T>(sql).AsEnumerable().First();
+    }
 
     public void Save() => context.SaveChanges();
 

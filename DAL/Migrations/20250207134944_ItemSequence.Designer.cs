@@ -3,6 +3,7 @@ using System;
 using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(OrdersTaskContext))]
-    partial class OrdersTaskContextModelSnapshot : ModelSnapshot
+    [Migration("20250207134944_ItemSequence")]
+    partial class ItemSequence
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,10 +28,7 @@ namespace DAL.Migrations
             modelBuilder.HasSequence<int>("CustomerSequence")
                 .HasMax(2147483647L);
 
-            modelBuilder.HasSequence("ItemSequence")
-                .HasMax(2147483647L);
-
-            modelBuilder.HasSequence<int>("OrderSequence")
+            modelBuilder.HasSequence<int>("ItemSequence")
                 .HasMax(2147483647L);
 
             modelBuilder.Entity("DAL.Entities.Item", b =>

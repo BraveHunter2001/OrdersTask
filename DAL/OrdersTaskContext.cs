@@ -1,5 +1,5 @@
 ﻿using DAL.Entities;
-using DAL.Secuenser;
+using DAL.Sequenser;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL;
@@ -41,6 +41,18 @@ public class OrdersTaskContext : DbContext
 
         modelBuilder
             .HasSequence<int>(nameof(SequenceType.CustomerSequence))
+            .StartsAt(1)
+            .IncrementsBy(1)
+            .HasMax(int.MaxValue);
+
+        modelBuilder
+            .HasSequence<long>(nameof(SequenceType.ItemSequence))
+            .StartsAt(1)
+            .IncrementsBy(1)
+            .HasMax(int.MaxValue);
+
+        modelBuilder
+            .HasSequence<int>(nameof(SequenceType.OrderSequence))
             .StartsAt(1)
             .IncrementsBy(1)
             .HasMax(int.MaxValue);

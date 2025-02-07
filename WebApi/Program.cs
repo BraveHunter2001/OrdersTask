@@ -1,6 +1,7 @@
 using DAL;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Services;
+using WebApi.Validators;
 
 namespace WebApi
 {
@@ -13,6 +14,7 @@ namespace WebApi
 
             builder.Services.AddDAL(connectionString);
             builder.Services.AddServices();
+            builder.Services.AddValidators();
 
             builder.Services
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -32,7 +34,8 @@ namespace WebApi
 
             builder.Services.AddAuthorization();
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers(options =>
+                options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 
             var app = builder.Build();
             app.UseHttpsRedirection();
