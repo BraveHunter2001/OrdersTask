@@ -9,7 +9,7 @@ public class Order
     /// </summary>
     public DateTime OrderDate { get; set; }
 
-    public DateTime ShipmentDate { get; set; }
+    public DateTime? ShipmentDate { get; set; }
     public int OrderNumber { get; set; }
     public OrderStatus Status { get; set; }
 

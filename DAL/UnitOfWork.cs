@@ -1,5 +1,4 @@
-﻿using DAL.Entities;
-using DAL.Repositories;
+﻿using DAL.Repositories;
 using DAL.Sequenser;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,7 +8,7 @@ public interface IUnitOfWork
 {
     IUserRepository UserRepository { get; }
     ICustomerRepository CustomerRepository { get; }
-    IRepository<Order> OrderRepository { get; }
+    IOrderRepository OrderRepository { get; }
     IItemRepository ItemRepository { get; }
     T GetNextValueSequence<T>(SequenceType sequenceType);
 
@@ -21,12 +20,12 @@ internal class UnitOfWork(OrdersTaskContext context) : IUnitOfWork, IDisposable
     private IUserRepository _userRepository;
     private ICustomerRepository _customerRepository;
     private IItemRepository _itemRepository;
-    private IRepository<Order> _orderRepository;
+    private IOrderRepository _orderRepository;
 
     public IUserRepository UserRepository => _userRepository ??= new UserRepository(context);
     public ICustomerRepository CustomerRepository => _customerRepository ??= new CustomerRepository(context);
     public IItemRepository ItemRepository => _itemRepository ??= new ItemRepository(context);
-    public IRepository<Order> OrderRepository => _orderRepository ??= new Repository<Order>(context);
+    public IOrderRepository OrderRepository => _orderRepository ??= new OrderRepository(context);
 
     public T GetNextValueSequence<T>(SequenceType sequenceType)
     {
