@@ -10,7 +10,9 @@ namespace WebApi
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
             string connectionString = builder.Configuration.GetValue<string>("ConnectionString")!;
+            string clientLocation = builder.Configuration.GetValue<string>("ClientUrl")!;
 
             builder.Services.AddDAL(connectionString);
             builder.Services.AddServices();
@@ -34,6 +36,19 @@ namespace WebApi
 
             builder.Services.AddAuthorization();
 
+            string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(name: MyAllowSpecificOrigins,
+                    o =>
+                    {
+                        o.WithOrigins(clientLocation)
+                            .AllowAnyHeader()
+                            .AllowAnyMethod()
+                            .AllowCredentials();
+                    });
+            });
+
             builder.Services.AddControllers(options =>
                 options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 
@@ -42,6 +57,8 @@ namespace WebApi
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseCors(MyAllowSpecificOrigins);
 
             app.MapControllers();
             app.Run();
