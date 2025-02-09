@@ -4,6 +4,7 @@ namespace WebApi.ViewModel;
 
 public class OrderListItemViewModel(Order order)
 {
+    public Guid OrderId { get; set; } = order.Id; 
     public int Number { get; set; } = order.OrderNumber;
     public OrderStatus Status { get; set; } = order.Status;
     public string StatusName => Status.ToString();

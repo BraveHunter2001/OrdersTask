@@ -39,7 +39,7 @@ public class OrdersController(
     {
         Order? order = orderService.GetSimpleOrderById(id);
         if (order is null) return NotFound();
-
+        
         orderService.AcceptOrder(order);
 
         return NoContent();

@@ -4,16 +4,58 @@ import {
   NGridItem,
   NPagination,
   NButton,
+  NButtonGroup,
   NSpace,
   useMessage,
   NDataTable,
 } from "naive-ui";
 import OrderFilter from "./OrderFilter.vue";
 import { h, onMounted, ref } from "vue";
-import { getAsync } from "../axios";
-import { FilterOrderStatus, PAGIANTED_ORDER_LIST_URL } from "../constants";
+import { getAsync, postAsync } from "../axios";
+import {
+  FilterOrderStatus,
+  GET_ACCEPT_ORDER_URL,
+  GET_CLOSE_ORDER_URL,
+  ORDER_STATUS,
+  PAGIANTED_ORDER_LIST_URL,
+} from "../constants";
 
-function createColumns({ play }) {
+const buildActionButtons = (row, accept, close) => {
+  const acceptButton = h(
+    NButton,
+    {
+      strong: true,
+      tertiary: true,
+      size: "small",
+      onClick: () => accept(row),
+    },
+    "Accept"
+  );
+
+  const closeButton = h(
+    NButton,
+    {
+      strong: true,
+      tertiary: true,
+      size: "small",
+      onClick: () => close(row),
+    },
+    "Close"
+  );
+
+  switch (row.status) {
+    case ORDER_STATUS.New:
+      return [acceptButton, closeButton];
+
+    case ORDER_STATUS.InProgress:
+      return [closeButton];
+
+    default:
+      return [];
+  }
+};
+
+const buildColumns = ({ accept, close }) => {
   return [
     {
       title: "Number",
@@ -35,28 +77,43 @@ function createColumns({ play }) {
       title: "Action",
       key: "actions",
       render(row) {
-        return h(
-          NButton,
-          {
-            strong: true,
-            tertiary: true,
-            size: "small",
-            onClick: () => play(row),
-          },
-          { default: () => "Play" }
+        return h(NButtonGroup, { size: "small" }, () =>
+          buildActionButtons(row, accept, close)
         );
       },
     },
   ];
-}
+};
 
-const columns = createColumns(() => console.log("Play"));
 const message = useMessage();
+
+const handleAcceptOrder = async (orderId) => {
+  const { isOk } = await postAsync(GET_ACCEPT_ORDER_URL(orderId));
+  if (isOk) {
+    message.success("Order was accepted");
+    await getOrders();
+  }
+};
+
+const handleCloseOrder = async (orderId) => {
+  const { isOk } = await postAsync(GET_CLOSE_ORDER_URL(orderId));
+  if (isOk) {
+    message.success("Order was canceled");
+    await getOrders();
+  }
+};
+
+const columns = buildColumns({
+  accept: (row) => handleAcceptOrder(row.orderId),
+  close: (row) => handleCloseOrder(row.orderId),
+});
+
 const PAGE_SIZE = 20;
 
 const handlerFilter = async (filterModel) => {
   await getOrders(filterModel);
 };
+
 const page = ref(1);
 const pageCount = ref(0);
 const orders = ref([]);
