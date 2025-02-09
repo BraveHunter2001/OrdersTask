@@ -39,7 +39,7 @@ namespace WebApi
             string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy(name: MyAllowSpecificOrigins,
+                options.AddPolicy(MyAllowSpecificOrigins,
                     o =>
                     {
                         o.WithOrigins(clientLocation)
@@ -53,12 +53,10 @@ namespace WebApi
                 options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 
             var app = builder.Build();
-            app.UseHttpsRedirection();
-
-            app.UseAuthentication();
-            app.UseAuthorization();
 
             app.UseCors(MyAllowSpecificOrigins);
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.MapControllers();
             app.Run();

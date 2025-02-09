@@ -7,6 +7,7 @@ using Services;
 using Services.Dtos;
 using System.Security.Claims;
 using WebApi.Models;
+using WebApi.Utils;
 
 namespace WebApi.Controllers;
 
@@ -56,4 +57,13 @@ public class AuthController(
     [Authorize]
     [HttpPost("logout")]
     public IActionResult Logout() => SignOut(CookieAuthenticationDefaults.AuthenticationScheme);
+
+    [Authorize]
+    [HttpGet("userInfo")]
+    public IActionResult GetUserInfo()
+    {
+        Guid userId = HttpContext.GetAuthorizedUserId();    
+        User user = userService.GetUserById(userId)!; 
+        return Ok(new {user.Login, RoleName = user.Role.ToString() }) ;
+    }
 }

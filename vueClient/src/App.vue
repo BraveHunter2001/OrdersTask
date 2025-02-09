@@ -1,16 +1,12 @@
 <script setup>
-import AuthModal from './components/AuthModal.vue';
-import { ref } from 'vue';
-
-
-const showModal = ref(false)
+import { ref } from "vue";
+import UserAuth from "./components/UserAuth.vue";
+import UserInfoProvider from "./components/UserInfoProvider.vue";
 </script>
 
 <template>
-  <button @click="()=>showModal = !showModal">Auth</button>
-  <AuthModal :show="showModal" @close="showModal = false"/>
+  <UserInfoProvider><UserAuth /></UserInfoProvider>
 </template>
 
 <style scoped>
-
 </style>
