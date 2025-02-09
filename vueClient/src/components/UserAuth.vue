@@ -1,9 +1,16 @@
 <script setup>
 import { postAsync } from "../axios";
 import { AUTH_URL } from "../constants";
-import { NButton, NH6, NModal, NCard, NInput } from "naive-ui";
-import { ref, inject, watch } from "vue";
-import { useRouter } from "vue-router";
+import {
+  NButton,
+  NH6,
+  NModal,
+  NCard,
+  NInput,
+  NForm,
+  NFormItem,
+} from "naive-ui";
+import { ref, inject } from "vue";
 
 const props = defineProps({
   show: Boolean,
@@ -15,8 +22,6 @@ const loginModel = ref({
 });
 const showModal = ref(false);
 const userInfoRef = inject("userInfoRef", null);
-
-const router = useRouter();
 
 const login = async () => {
   const { isOk, data } = await postAsync(AUTH_URL, loginModel.value);
@@ -42,18 +47,24 @@ const login = async () => {
       role="dialog"
       aria-modal="true"
     >
-      <n-input
-        v-model:value="loginModel.Login"
-        type="text"
-        placeholder="Login"
-      />
-      <n-input
-        v-model:value="loginModel.Password"
-        type="password"
-        show-password-on="mousedown"
-        placeholder="Password"
-      />
-      <template #footer><NButton @click="login">Login</NButton></template>
+      <n-form :model="loginModel">
+        <n-form-item label="Login">
+          <n-input
+            v-model:value="loginModel.Login"
+            type="text"
+            placeholder="Login"
+          />
+        </n-form-item>
+        <n-form-item label="Password">
+          <n-input
+            v-model:value="loginModel.Password"
+            type="password"
+            show-password-on="mousedown"
+            placeholder="Password"
+          />
+        </n-form-item>
+        <n-form-item><NButton @click="login">Login</NButton></n-form-item>
+      </n-form>
     </n-card>
   </n-modal>
 </template>
