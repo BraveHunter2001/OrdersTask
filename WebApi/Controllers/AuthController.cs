@@ -64,6 +64,6 @@ public class AuthController(
     {
         Guid userId = HttpContext.GetAuthorizedUserId();    
         User user = userService.GetUserById(userId)!; 
-        return Ok(new {user.Login, RoleName = user.Role.ToString() }) ;
+        return Ok(new {user.Login, user.Role, RoleName = user.Role.ToString() }) ;
     }
 }

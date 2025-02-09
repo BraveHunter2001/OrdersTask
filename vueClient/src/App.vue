@@ -1,11 +1,14 @@
 <script setup>
-import { ref } from "vue";
-import UserAuth from "./components/UserAuth.vue";
+import { RouterView } from "vue-router";
 import UserInfoProvider from "./components/UserInfoProvider.vue";
+import Navigation from "./components/Navigation.vue";
 </script>
 
 <template>
-  <UserInfoProvider><UserAuth /></UserInfoProvider>
+  <UserInfoProvider>
+    <Navigation />
+    <RouterView />
+  </UserInfoProvider>
 </template>
 
 <style scoped>
