@@ -9,6 +9,7 @@ import {
   NInput,
   NForm,
   NFormItem,
+  useMessage,
 } from "naive-ui";
 import { ref, inject } from "vue";
 
@@ -23,12 +24,17 @@ const loginModel = ref({
 const showModal = ref(false);
 const userInfoRef = inject("userInfoRef", null);
 
+const message = useMessage();
+
 const login = async () => {
   const { isOk, data } = await postAsync(AUTH_URL, loginModel.value);
 
   if (isOk) {
     showModal.value = false;
+
+    //todo: сделать лучше переход с обновлением информ пользователя
     window.location.href = "/";
+    message.success("Succsesfull login");
   }
 };
 </script>

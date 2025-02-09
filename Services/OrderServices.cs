@@ -1,4 +1,5 @@
 ﻿using DAL;
+using DAL.Dto;
 using DAL.Entities;
 using DAL.Sequenser;
 using Services.Dtos;
@@ -13,6 +14,8 @@ public interface IOrderService
     void CloseOrder(Order order);
     Order? GetOrderById(Guid id);
     Order? GetSimpleOrderById(Guid id);
+
+    PaginatedContainer<List<Order>> GetPaginatedOrderList(OrderListFilter filter);
 }
 
 internal class OrderServices(IUnitOfWork uow) : IOrderService
@@ -68,11 +71,13 @@ internal class OrderServices(IUnitOfWork uow) : IOrderService
     public void CloseOrder(Order order)
     {
         order.Status = OrderStatus.Completed;
-  
+
         uow.OrderRepository.Update(order);
         uow.Save();
     }
 
     public Order? GetOrderById(Guid id) => uow.OrderRepository.GetFullOrderById(id);
     public Order? GetSimpleOrderById(Guid id) => uow.OrderRepository.GetById(id);
+    public PaginatedContainer<List<Order>> GetPaginatedOrderList(OrderListFilter filter) =>
+        uow.OrderRepository.GetPaginatedOrderList(filter);
 }

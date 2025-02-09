@@ -1,4 +1,5 @@
-﻿using DAL.Entities;
+﻿using DAL.Dto;
+using DAL.Entities;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +7,7 @@ using Services;
 using Services.Dtos;
 using WebApi.Utils;
 using WebApi.Validators;
+using WebApi.ViewModel;
 
 namespace WebApi.Controllers;
 
@@ -95,5 +97,19 @@ public class OrdersController(
         };
 
         return Ok(model);
+    }
+
+    [HttpGet("paginated")]
+    [Authorize]
+    public IActionResult GetPaginatedOrder([FromQuery] OrderListFilter filter)
+    {
+        var paginatedList = orderService.GetPaginatedOrderList(filter);
+
+        var paginatedListVieModal = new PaginatedContainer<List<OrderListItemViewModel>>(
+            paginatedList.Value.ConvertAll(o => new OrderListItemViewModel(o)),
+            paginatedList.TotalCount,
+            paginatedList.TotalPages
+        );
+        return Ok(paginatedListVieModal);
     }
 }

@@ -17,8 +17,8 @@ const hasManagerLink = computed(
 </script>
 
 <template>
-  <n-grid x-gap="12" :cols="2">
-    <n-grid-item>
+  <n-grid x-gap="12" :cols="12">
+    <n-grid-item :span="11">
       <n-space>
         <n-button type="primary" @click="() => router.push('/')">Home</n-button>
         <n-button
@@ -47,7 +47,7 @@ const hasManagerLink = computed(
         >
       </n-space>
     </n-grid-item>
-    <n-grid-item><UserAuth /></n-grid-item>
+    <n-grid-item :span="1"><UserAuth /></n-grid-item>
   </n-grid>
 </template>
 
