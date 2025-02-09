@@ -27,16 +27,7 @@ internal class OrderRepository(OrdersTaskContext context) : Repository<Order>(co
             .Where(o => !filter.Status.HasValue || o.Status == filter.Status)
             .OrderByDescending(o => o.OrderDate);
 
-        var paginatedList = query
-            .Skip(filter.PageIndex * filter.PageSize)
-            .Take(filter.PageSize);
-
-        int totalCount = query.Count();
-
-        var result = new PaginatedContainer<List<Order>>(paginatedList.ToList(),
-            totalCount,
-            (int) Math.Ceiling(totalCount / (double) filter.PageSize));
-
+        var result = GetPaginatedListContainer(query, filter);
         return result;
     }
 }

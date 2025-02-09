@@ -85,8 +85,13 @@ const buildColumns = ({ accept, close }) => {
   ];
 };
 
-const message = useMessage();
+const columns = buildColumns({
+  accept: (row) => handleAcceptOrder(row.orderId),
+  close: (row) => handleCloseOrder(row.orderId),
+});
 
+const message = useMessage();
+const handleFilter = async (filterModel) => await getOrders(filterModel);
 const handleAcceptOrder = async (orderId) => {
   const { isOk } = await postAsync(GET_ACCEPT_ORDER_URL(orderId));
   if (isOk) {
@@ -103,24 +108,12 @@ const handleCloseOrder = async (orderId) => {
   }
 };
 
-const columns = buildColumns({
-  accept: (row) => handleAcceptOrder(row.orderId),
-  close: (row) => handleCloseOrder(row.orderId),
-});
-
 const PAGE_SIZE = 20;
-
-const handlerFilter = async (filterModel) => {
-  await getOrders(filterModel);
-};
-
 const page = ref(1);
 const pageCount = ref(0);
 const orders = ref([]);
 
-onMounted(async () => {
-  await getOrders();
-});
+onMounted(async () => await getOrders());
 
 const getOrders = async (filter) => {
   let url =
@@ -142,7 +135,7 @@ const getOrders = async (filter) => {
 <template>
   <n-grid :cols="12">
     <n-grid-item :span="4"
-      ><OrderFilter :onFilterHandler="handlerFilter"
+      ><OrderFilter :onFilterHandler="handleFilter"
     /></n-grid-item>
     <n-grid-item :span="8">
       <n-data-table
@@ -156,6 +149,12 @@ const getOrders = async (filter) => {
         ><n-pagination
           v-model:page="page"
           :page-count="pageCount"
+          :on-update:page="
+            (num) => {
+              page = num;
+              getOrders();
+            }
+          "
           simple /></n-space
     ></n-grid-item>
   </n-grid>

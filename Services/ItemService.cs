@@ -1,4 +1,5 @@
 ﻿using DAL;
+using DAL.Dto;
 using DAL.Entities;
 using DAL.Sequenser;
 using Services.Dtos;
@@ -11,6 +12,8 @@ public interface IItemService
     void UpdateItem(Item origin, UpdatingItemDto updatingDto);
     void DeleteItem(Item item);
     Item? GetItemById(Guid id);
+    PaginatedContainer<List<Item>> GetPaginatedItemList(ItemListFilter filter);
+    SuggestDto<string>[] GetCategorySuggest(string query);
 }
 
 internal class ItemService(IUnitOfWork uow) : IItemService
@@ -50,6 +53,11 @@ internal class ItemService(IUnitOfWork uow) : IItemService
     }
 
     public Item? GetItemById(Guid id) => uow.ItemRepository.GetById(id);
+
+    public PaginatedContainer<List<Item>> GetPaginatedItemList(ItemListFilter filter) =>
+        uow.ItemRepository.GetPaginatedItemList(filter);
+
+    public SuggestDto<string>[] GetCategorySuggest(string query) => uow.ItemRepository.GetCategorySuggest(query);
 
     private string GenerateCode()
     {

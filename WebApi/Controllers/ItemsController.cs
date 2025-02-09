@@ -1,10 +1,12 @@
-﻿using DAL.Entities;
+﻿using DAL.Dto;
+using DAL.Entities;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services;
 using Services.Dtos;
 using WebApi.Validators;
+using WebApi.ViewModel;
 
 namespace WebApi.Controllers;
 
@@ -55,4 +57,18 @@ public class ItemsController(
 
     [HttpGet("{id}")]
     public IActionResult GetItem([FromRoute] Guid id) => Ok(itemService.GetItemById(id));
+
+    [HttpGet("paginated")]
+    [Authorize]
+    public IActionResult GetPaginatedOrder([FromQuery] ItemListFilter filter)
+    {
+        var paginatedList = itemService.GetPaginatedItemList(filter);
+
+        var paginatedListVieModal = new PaginatedContainer<List<ItemListViewModel>>(
+            paginatedList.Value.ConvertAll(i => new ItemListViewModel(i)),
+            paginatedList.TotalCount,
+            paginatedList.TotalPages
+        );
+        return Ok(paginatedListVieModal);
+    }
 }

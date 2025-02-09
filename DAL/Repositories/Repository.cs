@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DAL.Dto;
+using DAL.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories;
 
@@ -54,5 +56,21 @@ internal class Repository<TEntity>(OrdersTaskContext context) : IRepository<TEnt
     {
         Dispose(true);
         GC.SuppressFinalize(this);
+    }
+
+    protected PaginatedContainer<List<T>> GetPaginatedListContainer<T>(IQueryable<T> query, PaginatedFilter filter)
+        where T : TEntity
+    {
+        var paginatedList = query
+            .Skip(filter.PageIndex * filter.PageSize)
+            .Take(filter.PageSize);
+
+        int totalCount = query.Count();
+
+        var result = new PaginatedContainer<List<T>>(paginatedList.ToList(),
+            totalCount,
+            (int) Math.Ceiling(totalCount / (double) filter.PageSize));
+
+        return result;
     }
 }
