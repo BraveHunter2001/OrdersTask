@@ -5,55 +5,62 @@ import {
   NInput,
   NButton,
   NSpace,
+  useMessage,
+  NDataTable,
+  NModal,
   NSelect,
-  NRadioGroup,
-  NRadioButton,
+  NCard,
 } from "naive-ui";
-import { handleError, ref } from "vue";
 import { getAsync } from "../axios";
 import { GET_SUGGESTS_URL } from "../constants";
+import { ref } from "vue";
 
 const props = defineProps({
-  onFilterHandler: {
+  onSubmitHandler: {
     type: Function,
     required: true,
   },
 });
 
-const filterModel = ref({ code: null, categories: null });
+const itemModalRef = ref({
+  name: null,
+  category: null,
+  price: 0,
+});
 const loadingRef = ref(false);
 const optionsRef = ref([]);
 
-const onFilter = () => {
-  props.onFilterHandler(filterModel.value);
+const onSubmit = () => {
+  props.onSubmitHandler(itemModalRef.value);
 };
 
 const handleSearch = async (query) => {
   if (query?.length <= 3) {
-    optionsRef.value = [];
+    optionsRef.value = [{ label: `${query}`, value: query }];
     return;
   }
 
   loadingRef.value = true;
   const { isOk, data } = await getAsync(GET_SUGGESTS_URL(query));
-  if (isOk) optionsRef.value = data;
+  if (isOk && data?.length > 0) optionsRef.value = data;
+  else optionsRef.value = [{ label: query, value: query }];
   loadingRef.value = false;
 };
 </script>
 
 <template>
-  <n-form inline :label-width="80" :model="filterModel">
+  <n-form inline :label-width="80" :model="itemModalRef">
     <n-space vertical>
-      <n-form-item label="Code"
+      <n-form-item label="Name"
         ><n-input
-          v-model:value="filterModel.code"
+          v-model:value="itemModalRef.name"
           type="text"
-          placeholder="Code"
+          placeholder="Name"
       /></n-form-item>
       <n-form-item label="Categories">
         <n-select
-          v-model:value="filterModel.categories"
-          multiple
+          v-model:value="itemModalRef.category"
+          tag
           filterable
           placeholder="Input categories"
           :options="optionsRef"
@@ -64,9 +71,18 @@ const handleSearch = async (query) => {
           @search="handleSearch"
         />
       </n-form-item>
+      <n-form-item label="Price"
+        ><n-input
+          v-model:value="itemModalRef.price"
+          type="number"
+          placeholder="Price"
+      /></n-form-item>
       <n-form-item>
-        <n-button type="primary" @click="onFilter">Filter</n-button>
+        <n-button type="primary" @click="onSubmit">Submit</n-button>
       </n-form-item>
     </n-space>
   </n-form>
 </template>
+
+<style scoped>
+</style>

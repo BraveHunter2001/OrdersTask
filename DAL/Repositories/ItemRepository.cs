@@ -33,7 +33,7 @@ internal class ItemRepository(OrdersTaskContext context) : Repository<Item>(cont
             .Where(i =>
                 (string.IsNullOrWhiteSpace(filter.Code) || i.Code.StartsWith(filter.Code))
                 && (isEmptyCategories || filter.Categories.Contains(i.Category))
-            );
+            ).OrderByDescending(i => i.Code);
 
         var result = GetPaginatedListContainer(query, filter);
         return result;

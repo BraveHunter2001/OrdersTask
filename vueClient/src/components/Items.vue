@@ -9,12 +9,19 @@ import {
   NSpace,
   useMessage,
   NDataTable,
+  NModal,
+  NCard,
 } from "naive-ui";
 
 import { h, onMounted, ref } from "vue";
-import { getAsync, postAsync } from "../axios";
-import { PAGIANTED_ITEMS_LIST_URL } from "../constants";
+import { deleteAsync, getAsync, postAsync } from "../axios";
+import {
+  GET_ITEM_ID_URL,
+  ITEMS_URL,
+  PAGIANTED_ITEMS_LIST_URL,
+} from "../constants";
 import ItemFilter from "./ItemFilter.vue";
+import ItemCard from "./ItemCard.vue";
 
 const buildActionButtons = (row, change, del) => {
   const changeButton = h(
@@ -42,7 +49,7 @@ const buildActionButtons = (row, change, del) => {
   return [changeButton, deleteButton];
 };
 
-const buildColumns = ({ accept, close }) => {
+const buildColumns = ({ change, del }) => {
   return [
     {
       title: "Code",
@@ -65,7 +72,7 @@ const buildColumns = ({ accept, close }) => {
       key: "actions",
       render(row) {
         return h(NButtonGroup, { size: "small" }, () =>
-          buildActionButtons(row, accept, close)
+          buildActionButtons(row, change, del)
         );
       },
     },
@@ -74,10 +81,15 @@ const buildColumns = ({ accept, close }) => {
 
 const columns = buildColumns({
   change: (row) => console.log(row),
-  del: (row) => console.log(row),
+  del: (row) => handleDeleteItem(row.itemId),
 });
 
 const message = useMessage();
+
+const handleDeleteItem = async (itemId) => {
+  await deleteAsync(GET_ITEM_ID_URL(itemId));
+  getItems();
+};
 
 const handleFilter = async (filterModel) => await getItems(filterModel);
 
@@ -85,6 +97,7 @@ const PAGE_SIZE = 10;
 const page = ref(1);
 const pageCount = ref(0);
 const items = ref([]);
+const showItemModal = ref(false);
 
 onMounted(async () => await getItems());
 
@@ -109,6 +122,19 @@ const getItems = async (filter) => {
     pageCount.value = data.totalPages;
   } else message.error("failed to receive items");
 };
+
+const handleAddItem = async (model) => {
+  const { isOk, data } = await postAsync(ITEMS_URL, model);
+
+  if (isOk) {
+    message.success("Item successful added");
+    getItems();
+  } else {
+    let mes = "";
+    for (const message of data.response.data) mes += message;
+    message.error(mes);
+  }
+};
 </script>
 
 <template>
@@ -117,6 +143,7 @@ const getItems = async (filter) => {
       ><ItemFilter :onFilterHandler="handleFilter"
     /></n-grid-item>
     <n-grid-item :span="8">
+      <n-button @click="showItemModal = true">Add</n-button>
       <n-data-table
         :columns="columns"
         :data="items"
@@ -137,4 +164,13 @@ const getItems = async (filter) => {
           simple /></n-space
     ></n-grid-item>
   </n-grid>
+  <n-modal v-model:show="showItemModal"
+    ><n-card
+      style="width: 600px"
+      title="Item"
+      size="small"
+      role="dialog"
+      aria-modal="true"
+      ><ItemCard :onSubmitHandler="handleAddItem" /></n-card
+  ></n-modal>
 </template>

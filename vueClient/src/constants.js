@@ -7,7 +7,9 @@ export const PAGIANTED_ORDER_LIST_URL = BACKED_URL + "orders/paginated";
 export const GET_ACCEPT_ORDER_URL = (id) => BACKED_URL + `orders/${id}/accept`;
 export const GET_CLOSE_ORDER_URL = (id) => BACKED_URL + `orders/${id}/close`;
 
+export const ITEMS_URL = BACKED_URL + `items`;
 export const PAGIANTED_ITEMS_LIST_URL = BACKED_URL + "items/paginated";
+export const GET_ITEM_ID_URL = (id) => BACKED_URL + `items/${id}`;
 
 export const GET_SUGGESTS_URL = (query) =>
   BACKED_URL + `suggests/category?query=${query}`;
