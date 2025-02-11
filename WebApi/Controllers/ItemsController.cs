@@ -12,7 +12,7 @@ namespace WebApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize(Roles = nameof(UserRole.Manager))]
+
 public class ItemsController(
     IItemService itemService,
     IValidator<ItemDto> itemDtoValidator,
@@ -20,6 +20,7 @@ public class ItemsController(
 ) : ControllerBase
 {
     [HttpPost]
+    [Authorize(Roles = nameof(UserRole.Manager))]
     public IActionResult CreateItem(ItemDto itemDto)
     {
         var validationResults = itemDtoValidator.ValidateModel(itemDto);
@@ -31,6 +32,7 @@ public class ItemsController(
     }
 
     [HttpPatch("{id}")]
+    [Authorize(Roles = nameof(UserRole.Manager))]
     public IActionResult UpdateItem([FromRoute] Guid id, UpdatingItemDto model)
     {
         Item? item = itemService.GetItemById(id);
@@ -45,6 +47,7 @@ public class ItemsController(
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = nameof(UserRole.Manager))]
     public IActionResult DeleteItem([FromRoute] Guid id)
     {
         Item? item = itemService.GetItemById(id);

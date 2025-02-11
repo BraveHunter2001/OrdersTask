@@ -10,17 +10,20 @@ import {
   NDataTable,
 } from "naive-ui";
 import OrderFilter from "./OrderFilter.vue";
-import { h, onMounted, ref } from "vue";
-import { getAsync, postAsync } from "../axios";
+import { h, inject, onMounted, ref } from "vue";
+import { deleteAsync, getAsync, postAsync } from "../axios";
 import {
   FilterOrderStatus,
   GET_ACCEPT_ORDER_URL,
   GET_CLOSE_ORDER_URL,
+  GET_ORDER_ID_URL,
   ORDER_STATUS,
   PAGIANTED_ORDER_LIST_URL,
+  ROLES,
 } from "../constants";
 
-const buildActionButtons = (row, accept, close) => {
+const buildActionButtons = (row, accept, close, del) => {
+  const isCustomer = userInfoRef.value.role === ROLES.Customer;
   const acceptButton = h(
     NButton,
     {
@@ -43,19 +46,30 @@ const buildActionButtons = (row, accept, close) => {
     "Close"
   );
 
+  const delButton = h(
+    NButton,
+    {
+      strong: true,
+      tertiary: true,
+      size: "small",
+      onClick: () => del(row),
+    },
+    "Delete"
+  );
+
   switch (row.status) {
     case ORDER_STATUS.New:
-      return [acceptButton, closeButton];
+      return isCustomer ? [delButton] : [acceptButton, closeButton];
 
     case ORDER_STATUS.InProgress:
-      return [closeButton];
+      return isCustomer ? [] : [closeButton];
 
     default:
       return [];
   }
 };
 
-const buildColumns = ({ accept, close }) => {
+const buildColumns = ({ accept, close, del }) => {
   return [
     {
       title: "Number",
@@ -78,7 +92,7 @@ const buildColumns = ({ accept, close }) => {
       key: "actions",
       render(row) {
         return h(NButtonGroup, { size: "small" }, () =>
-          buildActionButtons(row, accept, close)
+          buildActionButtons(row, accept, close, del)
         );
       },
     },
@@ -88,6 +102,7 @@ const buildColumns = ({ accept, close }) => {
 const columns = buildColumns({
   accept: (row) => handleAcceptOrder(row.orderId),
   close: (row) => handleCloseOrder(row.orderId),
+  del: (row) => handleDeleteOrder(row.orderId),
 });
 
 const message = useMessage();
@@ -108,10 +123,16 @@ const handleCloseOrder = async (orderId) => {
   }
 };
 
+const handleDeleteOrder = async (orderId) => {
+  await deleteAsync(GET_ORDER_ID_URL(orderId));
+  getOrders();
+};
+
 const PAGE_SIZE = 20;
 const page = ref(1);
 const pageCount = ref(0);
 const orders = ref([]);
+const userInfoRef = inject("userInfoRef", null);
 
 onMounted(async () => await getOrders());
 

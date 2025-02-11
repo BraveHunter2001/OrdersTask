@@ -1,6 +1,6 @@
 <script setup>
 import { postAsync } from "../axios";
-import { AUTH_URL } from "../constants";
+import { AUTH_URL, LOGOUT_URL } from "../constants";
 import {
   NButton,
   NH6,
@@ -18,8 +18,8 @@ const props = defineProps({
 });
 
 const loginModel = ref({
-  Login: "john_manager",
-  Password: "securepassword123",
+  Login: null,
+  Password: null,
 });
 const showModal = ref(false);
 const userInfoRef = inject("userInfoRef", null);
@@ -37,12 +37,22 @@ const login = async () => {
     message.success("Succsesfull login");
   }
 };
+
+const logout = async () => {
+  const { isOk } = await postAsync(LOGOUT_URL);
+
+  if (isOk) {
+    window.location.href = "/";
+    message.success("Succsesfull logout");
+  }
+};
 </script>
 
 <template>
   <NH6 v-if="userInfoRef"
     >{{ userInfoRef.login }} | {{ userInfoRef.roleName }}</NH6
   >
+  <NButton v-if="userInfoRef" secondary @click="logout">Logout</NButton>
   <NButton v-else secondary @click="showModal = true">Auth</NButton>
   <n-modal v-model:show="showModal">
     <n-card

@@ -13,7 +13,7 @@ import {
   NCard,
 } from "naive-ui";
 
-import { h, onMounted, ref, watch } from "vue";
+import { h, inject, onMounted, ref, watch } from "vue";
 import { deleteAsync, getAsync, patchAsync, postAsync } from "../axios";
 import {
   GET_ITEM_ID_URL,

@@ -21,22 +21,10 @@ const hasManagerLink = computed(
     <n-grid-item :span="11">
       <n-space>
         <n-button type="primary" @click="() => router.push('/')">Home</n-button>
-        <n-button
-          v-if="hasCustomersLink"
-          type="primary"
-          @click="() => router.push('/my-orders')"
-          >My orders</n-button
-        >
-        <n-button
-          v-if="hasManagerLink"
-          type="primary"
-          @click="() => router.push('/orders')"
+        <n-button type="primary" @click="() => router.push('/orders')"
           >Orders</n-button
         >
-        <n-button
-          v-if="hasManagerLink"
-          type="primary"
-          @click="() => router.push('/items')"
+        <n-button type="primary" @click="() => router.push('/items')"
           >Items</n-button
         >
         <n-button
