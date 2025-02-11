@@ -13,12 +13,13 @@ import {
   NCard,
 } from "naive-ui";
 
-import { h, inject, onMounted, ref, watch } from "vue";
+import { computed, h, inject, onMounted, ref, watch } from "vue";
 import { deleteAsync, getAsync, patchAsync, postAsync } from "../axios";
 import {
   GET_ITEM_ID_URL,
   ITEMS_URL,
   PAGIANTED_ITEMS_LIST_URL,
+  ROLES,
 } from "../constants";
 import ItemFilter from "./ItemFilter.vue";
 import ItemCard from "./ItemCard.vue";
@@ -50,7 +51,7 @@ const buildActionButtons = (row, change, del) => {
 };
 
 const buildColumns = ({ change, del }) => {
-  return [
+  const mainCols = [
     {
       title: "Code",
       key: "code",
@@ -67,7 +68,10 @@ const buildColumns = ({ change, del }) => {
       title: "Category",
       key: "category",
     },
-    {
+  ];
+
+  if (isManager.value)
+    mainCols.push({
       title: "Action",
       key: "actions",
       render(row) {
@@ -75,14 +79,10 @@ const buildColumns = ({ change, del }) => {
           buildActionButtons(row, change, del)
         );
       },
-    },
-  ];
-};
+    });
 
-const columns = buildColumns({
-  change: (row) => handleChangeItem(row.itemId),
-  del: (row) => handleDeleteItem(row.itemId),
-});
+  return mainCols;
+};
 
 const message = useMessage();
 
@@ -112,6 +112,13 @@ const items = ref([]);
 const showItemModal = ref(false);
 const selectedItem = ref(null);
 const isChangeItemModel = ref(false);
+const userInfoRef = inject("userInfoRef", null);
+const isManager = computed(() => userInfoRef.value?.role === ROLES.Manager);
+
+const columns = buildColumns({
+  change: (row) => handleChangeItem(row.itemId),
+  del: (row) => handleDeleteItem(row.itemId),
+});
 
 onMounted(async () => await getItems());
 
@@ -197,6 +204,7 @@ watch(showItemModal, (newValue) => {
     /></n-grid-item>
     <n-grid-item :span="8">
       <n-button
+        v-if="isManager"
         @click="
           () => {
             showItemModal = true;
