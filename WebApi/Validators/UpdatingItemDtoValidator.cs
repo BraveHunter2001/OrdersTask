@@ -17,7 +17,7 @@ public class UpdatingItemDtoValidator : AbstractValidator<UpdatingItemDto>
         When(x => !string.IsNullOrWhiteSpace(x.Code),
             () => RuleFor(x => x.Code)
                 .Matches(@"\d{2}-\d{4}-[A-Z]{2}\d{2}").WithMessage("Code must be format XX-XXXX-YYXX")
-                .Must(x => uow.ItemRepository.GetItemByCode(x) is null)
+                .Must(x => uow.ItemRepository.GetItemByCode(x) is null).WithMessage("This code has clready exist")
         );
     }
 }

@@ -13,8 +13,8 @@ import {
   NCard,
 } from "naive-ui";
 
-import { h, onMounted, ref } from "vue";
-import { deleteAsync, getAsync, postAsync } from "../axios";
+import { h, onMounted, ref, watch } from "vue";
+import { deleteAsync, getAsync, patchAsync, postAsync } from "../axios";
 import {
   GET_ITEM_ID_URL,
   ITEMS_URL,
@@ -80,11 +80,23 @@ const buildColumns = ({ change, del }) => {
 };
 
 const columns = buildColumns({
-  change: (row) => console.log(row),
+  change: (row) => handleChangeItem(row.itemId),
   del: (row) => handleDeleteItem(row.itemId),
 });
 
 const message = useMessage();
+
+const handleChangeItem = async (itemId) => {
+  isChangeItemModel.value = true;
+  const { isOk, data } = await getAsync(GET_ITEM_ID_URL(itemId));
+  if (!isOk) {
+    message.error("Couldn't get item to change");
+    return;
+  }
+
+  showItemModal.value = true;
+  selectedItem.value = data;
+};
 
 const handleDeleteItem = async (itemId) => {
   await deleteAsync(GET_ITEM_ID_URL(itemId));
@@ -98,6 +110,8 @@ const page = ref(1);
 const pageCount = ref(0);
 const items = ref([]);
 const showItemModal = ref(false);
+const selectedItem = ref(null);
+const isChangeItemModel = ref(false);
 
 onMounted(async () => await getItems());
 
@@ -123,7 +137,40 @@ const getItems = async (filter) => {
   } else message.error("failed to receive items");
 };
 
-const handleAddItem = async (model) => {
+const handleSubmitItem = async (model) => {
+  if (isChangeItemModel.value) {
+    await ChangeItem(model);
+  } else await AddItem(model);
+};
+
+const ChangeItem = async (model) => {
+  const changes = {};
+
+  for (const key in selectedItem.value) {
+    if (selectedItem.value[key] != model[key]) changes[key] = model[key];
+  }
+
+  if (Object.keys(changes).length == 0) {
+    message.info("Nothing change");
+    return;
+  }
+
+  const { isOk, data } = await patchAsync(
+    GET_ITEM_ID_URL(selectedItem.value.id),
+    changes
+  );
+
+  if (isOk) {
+    message.success("Item was changed");
+    getItems();
+  } else {
+    let mes = "";
+    for (const message of data) mes += message;
+    message.error(mes);
+  }
+};
+
+const AddItem = async (model) => {
   const { isOk, data } = await postAsync(ITEMS_URL, model);
 
   if (isOk) {
@@ -131,10 +178,16 @@ const handleAddItem = async (model) => {
     getItems();
   } else {
     let mes = "";
-    for (const message of data.response.data) mes += message;
+
+    for (const message of data) mes += message;
     message.error(mes);
   }
 };
+
+watch(showItemModal, (newValue) => {
+  if (newValue) return;
+  selectedItem.value = null;
+});
 </script>
 
 <template>
@@ -143,7 +196,15 @@ const handleAddItem = async (model) => {
       ><ItemFilter :onFilterHandler="handleFilter"
     /></n-grid-item>
     <n-grid-item :span="8">
-      <n-button @click="showItemModal = true">Add</n-button>
+      <n-button
+        @click="
+          () => {
+            showItemModal = true;
+            isChangeItemModel = false;
+          }
+        "
+        >Add</n-button
+      >
       <n-data-table
         :columns="columns"
         :data="items"
@@ -171,6 +232,8 @@ const handleAddItem = async (model) => {
       size="small"
       role="dialog"
       aria-modal="true"
-      ><ItemCard :onSubmitHandler="handleAddItem" /></n-card
+      ><ItemCard
+        :item="selectedItem"
+        :onSubmitHandler="handleSubmitItem" /></n-card
   ></n-modal>
 </template>

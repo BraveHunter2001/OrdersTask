@@ -13,20 +13,24 @@ import {
 } from "naive-ui";
 import { getAsync } from "../axios";
 import { GET_SUGGESTS_URL } from "../constants";
-import { ref } from "vue";
+import { ref, toRaw } from "vue";
 
 const props = defineProps({
   onSubmitHandler: {
     type: Function,
     required: true,
   },
+
+  item: Object,
 });
 
-const itemModalRef = ref({
-  name: null,
-  category: null,
-  price: 0,
-});
+const itemModalRef = ref(
+  (props.item && structuredClone(toRaw(props.item))) ?? {
+    name: null,
+    category: null,
+    price: 0,
+  }
+);
 const loadingRef = ref(false);
 const optionsRef = ref([]);
 
@@ -51,6 +55,12 @@ const handleSearch = async (query) => {
 <template>
   <n-form inline :label-width="80" :model="itemModalRef">
     <n-space vertical>
+      <n-form-item v-if="itemModalRef.code" label="Code"
+        ><n-input
+          v-model:value="itemModalRef.code"
+          type="text"
+          placeholder="Code"
+      /></n-form-item>
       <n-form-item label="Name"
         ><n-input
           v-model:value="itemModalRef.name"
