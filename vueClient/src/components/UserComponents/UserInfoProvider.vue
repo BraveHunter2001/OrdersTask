@@ -1,7 +1,7 @@
 <script setup>
 import { ref, provide, onMounted } from "vue";
-import { USER_INFO_URL } from "../constants";
-import { getAsync } from "../axios";
+import { USER_INFO_URL } from "../../constants";
+import { getAsync } from "../../axios";
 
 const userInfo = ref(null);
 provide("userInfoRef", userInfo);

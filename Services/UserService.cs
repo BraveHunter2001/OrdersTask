@@ -1,4 +1,5 @@
 ﻿using DAL;
+using DAL.Dto;
 using DAL.Entities;
 using DAL.Sequenser;
 using Services.Dtos;
@@ -8,12 +9,11 @@ namespace Services;
 public interface IUserService
 {
     User CreateUser(UserDto model);
-    Customer CreateCustomer(UserDto model);
     User? GetUserByLogin(string login);
-    User? GetUserById(Guid id);
+    User? GetUserById(Guid id, bool readOnly = true);
     void DeleteUser(User user);
     void UpdateUser(User origin, UpdatingUserDto model);
-    void UpdateCustomer(Customer customer, UpdatingUserDto model);
+    PaginatedContainer<List<User>> GetPaginatedUserList(UserListFilter filter);
 }
 
 internal class UserService(IUnitOfWork uow) : IUserService
@@ -22,59 +22,71 @@ internal class UserService(IUnitOfWork uow) : IUserService
     {
         User user = model.ToUser();
 
+        if (model.IsCustomer)
+            CreateCustomer(user, model.Name, model.Address, model.Discount);
+
         uow.UserRepository.Insert(user);
         uow.Save();
         return user;
     }
 
-    public Customer CreateCustomer(UserDto model)
+    private void CreateCustomer(User user, string name, string address, decimal? discount)
     {
-        Customer customer = model.ToCustomer();
+        Customer customer = new()
+        {
+            Name = name,
+            Address = address,
+            Discount = discount,
+            Code = GenerateCode(),
+        };
 
+       user.Customer = customer;
+    }
+
+    private string GenerateCode()
+    {
         int counter = uow.GetNextValueSequence<int>(SequenceType.CustomerSequence);
-        customer.Code = $"{counter:d4}-{DateTime.Now.Year}";
-
-        uow.CustomerRepository.Insert(customer);
-        uow.Save();
-
-        return customer;
+        return $"{counter:d4}-{DateTime.Now.Year}";
     }
 
     public User? GetUserByLogin(string login) => uow.UserRepository.GetUserByLogin(login);
-    public User? GetUserById(Guid id) => uow.UserRepository.GetById(id);
+    public User? GetUserById(Guid id, bool readOnly = true) => uow.UserRepository.GetUserById(id, readOnly);
 
     public void DeleteUser(User user)
     {
         uow.UserRepository.Delete(user);
+
         uow.Save();
     }
 
     public void UpdateUser(User origin, UpdatingUserDto model)
     {
+        if (model.Role.HasValue && model.Role.Value != origin.Role)
+            SwitchRole(origin, model);
+
         UpdateUserFields(origin, model);
+        if (origin.IsCustomer)
+            UpdateCustomerFields(origin.Customer!, model);
 
         uow.UserRepository.Update(origin);
         uow.Save();
     }
 
-    public void UpdateCustomer(Customer customer, UpdatingUserDto model)
+    private void SwitchRole(User origin, UpdatingUserDto model)
     {
-        UpdateUserFields(customer, model);
+        switch (origin.Role, model.Role)
+        {
+            case (UserRole.Customer, UserRole.Manager):
+                var customer = origin.Customer;
 
-        if (!string.IsNullOrWhiteSpace(model.Name))
-            customer.Name = model.Name;
+                origin.Customer = null;
+                uow.CustomerRepository.Delete(customer);
+                break;
 
-        if (!string.IsNullOrWhiteSpace(model.Address))
-            customer.Address = model.Address;
-
-        if (model.Discount.HasValue)
-            customer.Discount = model.Discount.Value;
-
-        if (!string.IsNullOrWhiteSpace(model.Code))
-            customer.Code = model.Code;
-
-        uow.CustomerRepository.Update(customer);
-        uow.Save();
+            case (UserRole.Manager, UserRole.Customer):
+                CreateCustomer(origin, model.Name, model.Address, model.Discount);
+                break;
+        }
     }
 
     private void UpdateUserFields(User origin, UpdatingUserDto model)
@@ -88,4 +100,24 @@ internal class UserService(IUnitOfWork uow) : IUserService
         if (model.Role.HasValue)
             origin.Role = model.Role.Value;
     }
+
+    private void UpdateCustomerFields(Customer customer, UpdatingUserDto model)
+    {
+        if (!string.IsNullOrWhiteSpace(model.Name))
+            customer.Name = model.Name;
+
+        if (!string.IsNullOrWhiteSpace(model.Address))
+            customer.Address = model.Address;
+
+        if (model.Discount.HasValue)
+            customer.Discount = model.Discount.Value;
+
+        if (!string.IsNullOrWhiteSpace(model.Code))
+            customer.Code = model.Code;
+        else if (string.IsNullOrWhiteSpace(customer.Code))
+            customer.Code = GenerateCode();
+    }
+
+    public PaginatedContainer<List<User>> GetPaginatedUserList(UserListFilter filter) =>
+        uow.UserRepository.GetPaginatedUserList(filter);
 }

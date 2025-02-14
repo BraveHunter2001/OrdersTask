@@ -11,8 +11,8 @@ import {
   NSelect,
   NCard,
 } from "naive-ui";
-import { getAsync } from "../axios";
-import { GET_SUGGESTS_URL } from "../constants";
+import { getAsync } from "../../axios";
+import { GET_SUGGESTS_URL } from "../../constants";
 import { ref, toRaw } from "vue";
 
 const props = defineProps({

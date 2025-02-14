@@ -8,7 +8,7 @@ import {
   NRadioButton,
 } from "naive-ui";
 import { ref } from "vue";
-import { FilterOrderStatus } from "../constants";
+import { FilterOrderStatus } from "../../constants";
 
 const props = defineProps({
   onFilterHandler: {

@@ -1,5 +1,4 @@
 ﻿using DAL.Dto;
-using DAL.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories;
@@ -11,7 +10,7 @@ internal class Repository<TEntity>(OrdersTaskContext context) : IRepository<TEnt
 
     private bool disposed = false;
 
-    public virtual TEntity GetById(object id, bool readOnly = true) => dbSet.Find(id);
+    public virtual TEntity GetById(object id) => dbSet.Find(id);
 
     public virtual void Insert(TEntity entity) => dbSet.Add(entity);
 
@@ -26,9 +25,7 @@ internal class Repository<TEntity>(OrdersTaskContext context) : IRepository<TEnt
     public virtual void Delete(TEntity entityToDelete)
     {
         if (context.Entry(entityToDelete).State == EntityState.Detached)
-        {
             dbSet.Attach(entityToDelete);
-        }
 
         dbSet.Remove(entityToDelete);
     }

@@ -14,39 +14,21 @@ import {
 } from "naive-ui";
 
 import { computed, h, inject, onMounted, ref, watch } from "vue";
-import { deleteAsync, getAsync, patchAsync, postAsync } from "../axios";
+import { deleteAsync, getAsync, patchAsync, postAsync } from "../../axios";
 import {
   GET_ITEM_ID_URL,
   ITEMS_URL,
   PAGIANTED_ITEMS_LIST_URL,
   ROLES,
-} from "../constants";
+} from "../../constants";
 import ItemFilter from "./ItemFilter.vue";
 import ItemCard from "./ItemCard.vue";
+import { showErrorMessages } from "../../utils";
+import { buildActionListButton } from "../componentUtils";
 
 const buildActionButtons = (row, change, del) => {
-  const changeButton = h(
-    NButton,
-    {
-      strong: true,
-      tertiary: true,
-      size: "small",
-      onClick: () => change(row),
-    },
-    "Change"
-  );
-
-  const deleteButton = h(
-    NButton,
-    {
-      strong: true,
-      tertiary: true,
-      size: "small",
-      onClick: () => del(row),
-    },
-    "Delete"
-  );
-
+  const changeButton = buildActionListButton("Change", () => change(row));
+  const deleteButton = buildActionListButton("Delete", () => del(row));
   return [changeButton, deleteButton];
 };
 
@@ -84,13 +66,13 @@ const buildColumns = ({ change, del }) => {
   return mainCols;
 };
 
-const message = useMessage();
+const messager = useMessage();
 
 const handleChangeItem = async (itemId) => {
   isChangeItemModel.value = true;
   const { isOk, data } = await getAsync(GET_ITEM_ID_URL(itemId));
   if (!isOk) {
-    message.error("Couldn't get item to change");
+    messager.error("Couldn't get item to change");
     return;
   }
 
@@ -141,7 +123,7 @@ const getItems = async (filter) => {
   if (isOk) {
     items.value = data.value;
     pageCount.value = data.totalPages;
-  } else message.error("failed to receive items");
+  } else messager.error("failed to receive items");
 };
 
 const handleSubmitItem = async (model) => {
@@ -158,7 +140,7 @@ const ChangeItem = async (model) => {
   }
 
   if (Object.keys(changes).length == 0) {
-    message.info("Nothing change");
+    messager.info("Nothing change");
     return;
   }
 
@@ -168,27 +150,18 @@ const ChangeItem = async (model) => {
   );
 
   if (isOk) {
-    message.success("Item was changed");
+    messager.success("Item was changed");
     getItems();
-  } else {
-    let mes = "";
-    for (const message of data) mes += message;
-    message.error(mes);
-  }
+  } else showErrorMessages(messager, data);
 };
 
 const AddItem = async (model) => {
   const { isOk, data } = await postAsync(ITEMS_URL, model);
 
   if (isOk) {
-    message.success("Item successful added");
+    messager.success("Item successful added");
     getItems();
-  } else {
-    let mes = "";
-
-    for (const message of data) mes += message;
-    message.error(mes);
-  }
+  } else showErrorMessages(messager, data);
 };
 
 watch(showItemModal, (newValue) => {

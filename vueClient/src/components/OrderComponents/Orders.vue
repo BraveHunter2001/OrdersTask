@@ -11,7 +11,7 @@ import {
 } from "naive-ui";
 import OrderFilter from "./OrderFilter.vue";
 import { h, inject, onMounted, ref } from "vue";
-import { deleteAsync, getAsync, postAsync } from "../axios";
+import { deleteAsync, getAsync, postAsync } from "../../axios";
 import {
   FilterOrderStatus,
   GET_ACCEPT_ORDER_URL,
@@ -20,42 +20,15 @@ import {
   ORDER_STATUS,
   PAGIANTED_ORDER_LIST_URL,
   ROLES,
-} from "../constants";
+} from "../../constants";
+import { buildActionListButton } from "../componentUtils";
 
 const buildActionButtons = (row, accept, close, del) => {
   const isCustomer = userInfoRef.value.role === ROLES.Customer;
-  const acceptButton = h(
-    NButton,
-    {
-      strong: true,
-      tertiary: true,
-      size: "small",
-      onClick: () => accept(row),
-    },
-    "Accept"
-  );
 
-  const closeButton = h(
-    NButton,
-    {
-      strong: true,
-      tertiary: true,
-      size: "small",
-      onClick: () => close(row),
-    },
-    "Close"
-  );
-
-  const delButton = h(
-    NButton,
-    {
-      strong: true,
-      tertiary: true,
-      size: "small",
-      onClick: () => del(row),
-    },
-    "Delete"
-  );
+  const acceptButton = buildActionListButton("Accept", () => accept(row));
+  const closeButton = buildActionListButton("Close", () => close(row));
+  const delButton = buildActionListButton("Delete", () => del(row));
 
   switch (row.status) {
     case ORDER_STATUS.New:

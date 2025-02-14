@@ -2,7 +2,7 @@
 
 public interface IRepository<TEntity> : IDisposable
 {
-    TEntity? GetById(object id, bool readOnly = true);
+    TEntity? GetById(object id);
 
     void Insert(TEntity entity);
     void InsertRange(IEnumerable<TEntity> entity);

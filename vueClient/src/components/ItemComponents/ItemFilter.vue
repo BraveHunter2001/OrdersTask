@@ -10,8 +10,8 @@ import {
   NRadioButton,
 } from "naive-ui";
 import { handleError, ref } from "vue";
-import { getAsync } from "../axios";
-import { GET_SUGGESTS_URL } from "../constants";
+import { getAsync } from "../../axios";
+import { GET_SUGGESTS_URL } from "../../constants";
 
 const props = defineProps({
   onFilterHandler: {

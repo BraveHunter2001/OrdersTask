@@ -22,11 +22,11 @@ public class OrdersTaskContext : DbContext
         modelBuilder.Entity<User>().Property(u => u.Role).HasConversion<string>();
         modelBuilder.Entity<Order>().Property(u => u.Status).HasConversion<string>();
 
-        //настройка наследования таблиц
         modelBuilder.Entity<User>()
-            .HasDiscriminator(u => u.Role)
-            .HasValue<User>(UserRole.Manager)
-            .HasValue<Customer>(UserRole.Customer);
+            .HasOne(u => u.Customer)
+            .WithOne(c => c.User)
+            .HasForeignKey<Customer>(u => u.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<OrderItem>()
             .HasOne(oi => oi.Order)

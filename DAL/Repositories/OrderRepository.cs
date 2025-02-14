@@ -24,7 +24,8 @@ internal class OrderRepository(OrdersTaskContext context) : Repository<Order>(co
     {
         var query = context.Orders
             .AsNoTracking()
-            .Where(o => !filter.Status.HasValue || o.Status == filter.Status)
+            .Where(o => (!filter.Status.HasValue || o.Status == filter.Status)
+                        && (!filter.CustomerId.HasValue || o.CustomerId == filter.CustomerId))
             .OrderByDescending(o => o.OrderDate);
 
         var result = GetPaginatedListContainer(query, filter);

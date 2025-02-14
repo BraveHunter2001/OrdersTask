@@ -16,9 +16,19 @@ export const GET_ITEM_ID_URL = (id) => BACKED_URL + `items/${id}`;
 export const GET_SUGGESTS_URL = (query) =>
   BACKED_URL + `suggests/category?query=${query}`;
 
+export const USERS_URL = BACKED_URL + `users`;
+export const PAGINATED_USERS_LIST_URL = BACKED_URL + "users/paginated";
+export const GET_USER_ID_URL = (id) => BACKED_URL + `users/${id}`;
+
 export const ROLES = {
   Manager: 0,
   Customer: 1,
+};
+
+export const FILTER_ROLES = {
+  All: 0,
+  Manager: 1,
+  Customer: 2,
 };
 
 export const FilterOrderStatus = {

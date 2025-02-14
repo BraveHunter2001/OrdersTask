@@ -1,6 +1,6 @@
 <script setup>
-import { postAsync } from "../axios";
-import { AUTH_URL, LOGOUT_URL } from "../constants";
+import { postAsync } from "../../axios";
+import { AUTH_URL, LOGOUT_URL } from "../../constants";
 import {
   NButton,
   NH6,

@@ -63,7 +63,10 @@ public class AuthController(
     public IActionResult GetUserInfo()
     {
         Guid userId = HttpContext.GetAuthorizedUserId();    
-        User user = userService.GetUserById(userId)!; 
+        User user = userService.GetUserById(userId)!;
+        if (user is null)
+            return Forbid();
+
         return Ok(new {user.Login, user.Role, RoleName = user.Role.ToString() }) ;
     }
 }

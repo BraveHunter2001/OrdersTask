@@ -1,6 +1,6 @@
 <script setup>
 import { RouterView } from "vue-router";
-import UserInfoProvider from "./components/UserInfoProvider.vue";
+import UserInfoProvider from "./components/UserComponents/UserInfoProvider.vue";
 import Navigation from "./components/Navigation.vue";
 import { NMessageProvider } from "naive-ui";
 </script>

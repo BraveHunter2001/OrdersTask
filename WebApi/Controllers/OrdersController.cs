@@ -27,8 +27,8 @@ public class OrdersController(
 
         var userId = HttpContext.GetAuthorizedUserId();
         User user = userService.GetUserById(userId)!;
-
-        var order = orderService.CreateOrder((user as Customer)!, creationOrderDto);
+        //Todo fix
+        var order = orderService.CreateOrder(user.Customer, creationOrderDto);
 
         return Ok(new { order.Id, order.Status });
     }
@@ -39,7 +39,7 @@ public class OrdersController(
     {
         Order? order = orderService.GetSimpleOrderById(id);
         if (order is null) return NotFound();
-        
+
         orderService.AcceptOrder(order);
 
         return NoContent();
@@ -73,36 +73,15 @@ public class OrdersController(
         return NoContent();
     }
 
-    [HttpGet("{id}")]
-    [Authorize]
-    public IActionResult GetOrder([FromRoute] Guid id)
-    {
-        Order? order = orderService.GetOrderById(id);
-        if (order is null) return NotFound();
-
-        var model = new
-        {
-            order.Id,
-            order.OrderNumber,
-            order.Status,
-            StatusName = order.Status.ToString(),
-            Items = order.OrderItems.Select(oi => new
-            {
-                oi.ItemId,
-                oi.Item.Code,
-                oi.Item.Name,
-                oi.ItemPrice,
-                oi.ItemsCount
-            })
-        };
-
-        return Ok(model);
-    }
-
     [HttpGet("paginated")]
     [Authorize]
     public IActionResult GetPaginatedOrder([FromQuery] OrderListFilter filter)
     {
+        if (HttpContext.GetAuthorizedUserRole() == UserRole.Customer)
+        {
+            filter.CustomerId = HttpContext.GetAuthorizedUserId();
+        }
+
         var paginatedList = orderService.GetPaginatedOrderList(filter);
 
         var paginatedListVieModal = new PaginatedContainer<List<OrderListItemViewModel>>(

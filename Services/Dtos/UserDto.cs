@@ -14,5 +14,4 @@ public class UserDto
     public bool IsCustomer => Role == UserRole.Customer;
 
     public User ToUser() => new(Login, Password, Role);
-    public Customer ToCustomer() => new(Login, Password, Role, Name, Address, Discount);
 }

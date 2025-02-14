@@ -1,4 +1,5 @@
 ﻿using DAL;
+using DAL.Entities;
 using FluentValidation;
 using Services.Dtos;
 
@@ -10,12 +11,18 @@ public class UpdatingUserDtoValidator : AbstractValidator<UpdatingUserDto>
     {
         RuleLevelCascadeMode = CascadeMode.Stop;
 
-        When(x => !string.IsNullOrWhiteSpace(x.Code),
+        When(x => !string.IsNullOrWhiteSpace(x.Login),
             () => RuleFor(x => x.Login)
-                .Must(x => !ValidateLogin(uow, x)).WithMessage("This login has already existed")
+                .Must(x => ValidateLogin(uow, x)).WithMessage("This login has already existed")
         );
 
         RuleFor(x => x.Role).IsInEnum();
+
+        RuleFor(x => x.Address).NotEmpty()
+            .When(x => x.Role == UserRole.Customer);
+        RuleFor(x => x.Name).NotEmpty()
+            .When(x => x.Role == UserRole.Customer);
+
         RuleFor(x => x.Discount).GreaterThanOrEqualTo(0);
 
         When(x => !string.IsNullOrWhiteSpace(x.Code),
@@ -29,6 +36,6 @@ public class UpdatingUserDtoValidator : AbstractValidator<UpdatingUserDto>
     protected virtual bool ValidateLogin(IUnitOfWork uow, string login)
     {
         var user = uow.UserRepository.GetUserByLogin(login);
-        return user is not null;
+        return user is null;
     }
 }

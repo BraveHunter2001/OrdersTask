@@ -1,10 +1,12 @@
-﻿using DAL.Entities;
+﻿using DAL.Dto;
+using DAL.Entities;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services;
 using Services.Dtos;
 using WebApi.Validators;
+using WebApi.ViewModel;
 
 namespace WebApi.Controllers;
 
@@ -23,11 +25,7 @@ public class UsersController(
         var validationResults = userDtoValidator.ValidateModel(model);
         if (validationResults is not null) return validationResults;
 
-        Func<UserDto, User> create = model.IsCustomer
-            ? userService.CreateCustomer
-            : userService.CreateUser;
-
-        User user = create(model);
+        User user = userService.CreateUser(model);
         return Ok(user.Id);
     }
 
@@ -35,7 +33,7 @@ public class UsersController(
     public IActionResult DeleteUser([FromRoute] Guid id)
     {
         User? user = userService.GetUserById(id);
-        if (user is not null)
+        if (user is null)
             return NotFound("This user dont exist");
 
         userService.DeleteUser(user!);
@@ -45,21 +43,33 @@ public class UsersController(
     [HttpPatch("{id}")]
     public IActionResult UpdateUser([FromRoute] Guid id, UpdatingUserDto model)
     {
-        User? user = userService.GetUserById(id);
+        User? user = userService.GetUserById(id, false);
         if (user is null)
             return NotFound("This user dont exist");
 
         var validationResults = updatingUserModelValidator.ValidateModel(model);
         if (validationResults is not null) return validationResults;
 
-        if (user.Role == UserRole.Customer && user is Customer customer)
-            userService.UpdateCustomer(customer, model);
-        else
-            userService.UpdateUser(user, model);
+        userService.UpdateUser(user, model);
+
         return NoContent();
     }
 
     [HttpGet("{id}")]
     public IActionResult GetUser(Guid id) =>
-        Ok(userService.GetUserById(id));
+        Ok(new UserViewModel(userService.GetUserById(id)));
+
+    [HttpGet("paginated")]
+    [Authorize]
+    public IActionResult GetPaginatedUsers([FromQuery] UserListFilter filter)
+    {
+        var paginatedList = userService.GetPaginatedUserList(filter);
+
+        var paginatedListVieModal = new PaginatedContainer<List<UserListItemViewModel>>(
+            paginatedList.Value.ConvertAll(o => new UserListItemViewModel(o)),
+            paginatedList.TotalCount,
+            paginatedList.TotalPages
+        );
+        return Ok(paginatedListVieModal);
+    }
 }
