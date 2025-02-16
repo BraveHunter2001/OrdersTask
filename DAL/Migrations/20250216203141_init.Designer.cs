@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(OrdersTaskContext))]
-    [Migration("20250216125301_Cardv2")]
-    partial class Cardv2
+    [Migration("20250216203141_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,7 +49,7 @@ namespace DAL.Migrations
                     b.HasIndex("CustomerId")
                         .IsUnique();
 
-                    b.ToTable("Cards");
+                    b.ToTable("Carts");
                 });
 
             modelBuilder.Entity("DAL.Entities.CartItem", b =>
