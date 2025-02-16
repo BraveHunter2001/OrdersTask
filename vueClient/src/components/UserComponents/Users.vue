@@ -88,7 +88,11 @@ const isChangeUserModel = ref(false);
 onMounted(async () => await getUsers());
 
 const handleDeleteUser = async (userId) => {
-  await deleteAsync(GET_USER_ID_URL(userId));
+  const { isOk, data } = await deleteAsync(GET_USER_ID_URL(userId));
+
+  if (isOk) messager.success("User was deleted");
+  else messager.error(data);
+
   getUsers();
 };
 

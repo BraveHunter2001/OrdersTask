@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services;
 using Services.Dtos;
+using WebApi.Utils;
 using WebApi.Validators;
 using WebApi.ViewModel;
 
@@ -35,6 +36,9 @@ public class UsersController(
         User? user = userService.GetUserById(id);
         if (user is null)
             return NotFound("This user dont exist");
+
+        if (user.Id == HttpContext.GetAuthorizedUserId())
+            return BadRequest("You can't delete yourself");
 
         userService.DeleteUser(user!);
         return NoContent();
