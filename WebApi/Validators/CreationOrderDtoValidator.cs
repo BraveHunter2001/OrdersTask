@@ -3,11 +3,12 @@ using Services.Dtos;
 
 namespace WebApi.Validators;
 
-public class CreationOrderDtoValidator : AbstractValidator<CreationOrderDto>
+public class CreationOrderDtoValidator : AbstractValidator<CreatingOrderDto>
 {
     public CreationOrderDtoValidator()
     {
-        RuleForEach(x=>x.OrderItems)
+        RuleForEach(x=>x.Items)
+            .NotNull()
             .Must(oi=>oi.Count > 0)
             .WithMessage("Items in order must be more zero");
     }

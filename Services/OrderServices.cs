@@ -8,7 +8,7 @@ namespace Services;
 
 public interface IOrderService
 {
-    Order CreateOrder(Customer customer, CreationOrderDto creationOrderDto);
+    Order CreateOrder(Customer customer, CreatingOrderDto creationOrderDto);
     bool TryDeleteOrder(Order order);
     void AcceptOrder(Order order);
     void CloseOrder(Order order);
@@ -18,9 +18,9 @@ public interface IOrderService
     PaginatedContainer<List<Order>> GetPaginatedOrderList(OrderListFilter filter);
 }
 
-internal class OrderServices(IUnitOfWork uow) : IOrderService
+internal class OrderService(ICartService cartService, IUnitOfWork uow) : IOrderService
 {
-    public Order CreateOrder(Customer customer, CreationOrderDto creationOrderDto)
+    public Order CreateOrder(Customer customer, CreatingOrderDto creationOrderDto)
     {
         Order order = new()
         {
@@ -29,10 +29,10 @@ internal class OrderServices(IUnitOfWork uow) : IOrderService
             OrderDate = DateTime.Now,
         };
 
-        Guid[] itemIds = creationOrderDto.OrderItems.Select(x => x.ItemId).ToArray();
+        Guid[] itemIds = creationOrderDto.Items.Select(x => x.ItemId).ToArray();
         var itemPriceDictionary = uow.ItemRepository.GetItemPriceDictionary(itemIds);
 
-        OrderItem[] orderItems = creationOrderDto.OrderItems.Select(x => new OrderItem
+        OrderItem[] orderItems = creationOrderDto.Items.Select(x => new OrderItem
         {
             ItemsCount = x.Count,
             ItemId = x.ItemId,
@@ -44,6 +44,13 @@ internal class OrderServices(IUnitOfWork uow) : IOrderService
 
         uow.OrderRepository.Insert(order);
         uow.Save();
+
+        cartService.ChangeRangeItem(new ChangingCartItemDto()
+        {
+            CartItems = creationOrderDto.Items,
+            Cart = customer.Cart,
+            ActionType = CardActionType.RemoveItems
+        });
 
         return order;
     }
@@ -78,6 +85,7 @@ internal class OrderServices(IUnitOfWork uow) : IOrderService
 
     public Order? GetOrderById(Guid id) => uow.OrderRepository.GetFullOrderById(id);
     public Order? GetSimpleOrderById(Guid id) => uow.OrderRepository.GetById(id);
+
     public PaginatedContainer<List<Order>> GetPaginatedOrderList(OrderListFilter filter) =>
         uow.OrderRepository.GetPaginatedOrderList(filter);
 }

@@ -8,7 +8,7 @@ public interface IUserRepository : IRepository<User>
 {
     User? GetUserByLogin(string login, bool readOnly = true);
     PaginatedContainer<List<User>> GetPaginatedUserList(UserListFilter filter);
-    User? GetUserById(Guid id, bool readOnly = true);
+    User? GetUserById(Guid id, bool readOnly = true, bool includeCart = false);
 }
 
 internal class UserRepository(OrdersTaskContext context) : Repository<User>(context), IUserRepository
@@ -34,13 +34,19 @@ internal class UserRepository(OrdersTaskContext context) : Repository<User>(cont
         return result;
     }
 
-    public User? GetUserById(Guid id, bool readOnly = true)
+    public User? GetUserById(Guid id, bool readOnly = true, bool includeCart = false)
     {
-        var query = context.Users
-            .Include(u => u.Customer);
+        var query = readOnly
+            ? context.Users.AsNoTracking()
+            : context.Users;
 
-        if (readOnly)
-            query.AsNoTracking();
+        query = query.Include(u => u.Customer);
+
+        if (includeCart)
+            query = query
+                .Include(u => u.Customer!.Cart)
+                .ThenInclude(c => c.Items)
+                .ThenInclude(c => c.Item);
 
         return query.FirstOrDefault(u => u.Id == id);
     }

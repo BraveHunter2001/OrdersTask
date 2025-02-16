@@ -10,7 +10,10 @@ public class OrdersTaskContext : DbContext
     public DbSet<Customer> Customers { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<Item> Items { get; set; }
+    public DbSet<Cart> Carts { get; set; }
+
     public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<CartItem> CartItems { get; set; }
 
     public OrdersTaskContext(DbContextOptions<OrdersTaskContext> options) : base(options)
     {
@@ -33,12 +36,24 @@ public class OrdersTaskContext : DbContext
             .WithMany(o => o.OrderItems)
             .HasForeignKey(oi => oi.OrderId);
 
+        modelBuilder.Entity<Customer>()
+            .HasOne(c => c.Cart)
+            .WithOne(cu => cu.Customer)
+            .HasForeignKey<Cart>(cu => cu.CustomerId);
+
+        modelBuilder.Entity<CartItem>()
+            .HasOne(ci => ci.Cart)
+            .WithMany(c => c.Items)
+            .HasForeignKey(ci => ci.CardId);
+
         // автогенерация айдишников 
         modelBuilder.Entity<User>().Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
         modelBuilder.Entity<Customer>().Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
         modelBuilder.Entity<Order>().Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
         modelBuilder.Entity<Item>().Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
         modelBuilder.Entity<OrderItem>().Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
+        modelBuilder.Entity<CartItem>().Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
+        modelBuilder.Entity<Cart>().Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
 
         modelBuilder
             .HasSequence<int>(nameof(SequenceType.CustomerSequence))

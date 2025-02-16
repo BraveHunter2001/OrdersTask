@@ -13,6 +13,6 @@ public static class DI
         services.AddScoped<IValidator<ItemDto>, ItemDtoValidator>();
         services.AddScoped<IValidator<UpdatingItemDto>, UpdatingItemDtoValidator>();
 
-        services.AddScoped<IValidator<CreationOrderDto>, CreationOrderDtoValidator>();
+        services.AddScoped<IValidator<CreatingOrderDto>, CreationOrderDtoValidator>();
     }
 }

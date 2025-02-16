@@ -10,7 +10,7 @@ public interface IUserService
 {
     User CreateUser(UserDto model);
     User? GetUserByLogin(string login);
-    User? GetUserById(Guid id, bool readOnly = true);
+    User? GetUserById(Guid id, bool readOnly = true, bool includeCard = false);
     void DeleteUser(User user);
     void UpdateUser(User origin, UpdatingUserDto model);
     PaginatedContainer<List<User>> GetPaginatedUserList(UserListFilter filter);
@@ -38,9 +38,10 @@ internal class UserService(IUnitOfWork uow) : IUserService
             Address = address,
             Discount = discount,
             Code = GenerateCode(),
+            Cart = new()
         };
 
-       user.Customer = customer;
+        user.Customer = customer;
     }
 
     private string GenerateCode()
@@ -50,7 +51,9 @@ internal class UserService(IUnitOfWork uow) : IUserService
     }
 
     public User? GetUserByLogin(string login) => uow.UserRepository.GetUserByLogin(login);
-    public User? GetUserById(Guid id, bool readOnly = true) => uow.UserRepository.GetUserById(id, readOnly);
+
+    public User? GetUserById(Guid id, bool readOnly = true, bool includeCard = false) =>
+        uow.UserRepository.GetUserById(id, readOnly, includeCard);
 
     public void DeleteUser(User user)
     {

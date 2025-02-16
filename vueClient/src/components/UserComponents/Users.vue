@@ -205,7 +205,7 @@ watch(showUserModal, (newValue) => {
   <n-modal v-model:show="showUserModal"
     ><n-card
       style="width: 600px"
-      title="Item"
+      title="User"
       size="small"
       role="dialog"
       aria-modal="true"

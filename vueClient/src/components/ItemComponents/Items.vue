@@ -16,15 +16,23 @@ import {
 import { computed, h, inject, onMounted, ref, watch } from "vue";
 import { deleteAsync, getAsync, patchAsync, postAsync } from "../../axios";
 import {
+  CART_ACTION_TYPE,
   GET_ITEM_ID_URL,
   ITEMS_URL,
+  MY_CART_URL,
+  ORDER_URL,
   PAGIANTED_ITEMS_LIST_URL,
   ROLES,
 } from "../../constants";
 import ItemFilter from "./ItemFilter.vue";
 import ItemCard from "./ItemCard.vue";
 import { showErrorMessages } from "../../utils";
-import { buildActionListButton } from "../componentUtils";
+import {
+  BaseItemColumn,
+  buildActionListButton,
+  getSelectedItems,
+} from "../componentUtils";
+import Cart from "./Cart.vue";
 
 const buildActionButtons = (row, change, del) => {
   const changeButton = buildActionListButton("Change", () => change(row));
@@ -33,24 +41,13 @@ const buildActionButtons = (row, change, del) => {
 };
 
 const buildColumns = ({ change, del }) => {
-  const mainCols = [
-    {
-      title: "Code",
-      key: "code",
-    },
-    {
-      title: "Name",
-      key: "name",
-    },
-    {
-      title: "Price",
-      key: "price",
-    },
-    {
-      title: "Category",
-      key: "category",
-    },
-  ];
+  let mainCols = [];
+  if (!isManager.value)
+    mainCols.push({
+      type: "selection",
+    });
+
+  mainCols = [...mainCols, ...BaseItemColumn];
 
   if (isManager.value)
     mainCols.push({
@@ -92,10 +89,12 @@ const page = ref(1);
 const pageCount = ref(0);
 const items = ref([]);
 const showItemModal = ref(false);
+const showCreateOrderModal = ref(false);
 const selectedItem = ref(null);
 const isChangeItemModel = ref(false);
 const userInfoRef = inject("userInfoRef", null);
 const isManager = computed(() => userInfoRef.value?.role === ROLES.Manager);
+const selectedItemRows = ref([]);
 
 const columns = buildColumns({
   change: (row) => handleChangeItem(row.itemId),
@@ -168,6 +167,26 @@ watch(showItemModal, (newValue) => {
   if (newValue) return;
   selectedItem.value = null;
 });
+
+const HandleAddItemsToCart = async () => {
+  const selitems = getSelectedItems(
+    selectedItemRows.value,
+    items.value,
+    (i, ids) => ids.has(i.itemId)
+  );
+  const request = {
+    cartItems: selitems.map((si) => ({
+      itemId: si.itemId,
+      count: 1,
+    })),
+    actionType: CART_ACTION_TYPE.AddItems,
+  };
+  const { isOk, data } = await patchAsync(MY_CART_URL, request);
+
+  if (isOk) {
+    messager.success("Items  succseccsul added into cart");
+  } else showErrorMessages(messager, data);
+};
 </script>
 
 <template>
@@ -186,11 +205,34 @@ watch(showItemModal, (newValue) => {
         "
         >Add</n-button
       >
+      <n-button v-if="!isManager" @click="HandleAddItemsToCart"
+        >Add to Cart</n-button
+      >
+      <n-button
+        v-if="!isManager"
+        @click="
+          () => {
+            showCreateOrderModal = true;
+          }
+        "
+        >Open Cart</n-button
+      >
+      <n-p v-if="selectedItemRows?.length > 0">
+        You have selected {{ selectedItemRows.length }} item{{
+          selectedItemRows.length < 2 ? "" : "s"
+        }}.
+      </n-p>
       <n-data-table
         :columns="columns"
         :data="items"
         :pagination="false"
         :bordered="false"
+        :row-key="(row) => row.itemId"
+        @update:checked-row-keys="
+          (keys) => {
+            selectedItemRows = keys;
+          }
+        "
     /></n-grid-item>
     <n-grid-item :span="12"
       ><n-space justify="center"
@@ -216,5 +258,14 @@ watch(showItemModal, (newValue) => {
       ><ItemCard
         :item="selectedItem"
         :onSubmitHandler="handleSubmitItem" /></n-card
+  ></n-modal>
+  <n-modal v-model:show="showCreateOrderModal"
+    ><n-card
+      style="width: 600px"
+      title="Cart"
+      size="small"
+      role="dialog"
+      aria-modal="true"
+      ><Cart :openCart="showCreateOrderModal" /></n-card
   ></n-modal>
 </template>

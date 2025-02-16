@@ -10,7 +10,7 @@ import {
   NDataTable,
 } from "naive-ui";
 import OrderFilter from "./OrderFilter.vue";
-import { h, inject, onMounted, ref } from "vue";
+import { computed, h, inject, onMounted, ref } from "vue";
 import { deleteAsync, getAsync, postAsync } from "../../axios";
 import {
   FilterOrderStatus,
@@ -24,18 +24,16 @@ import {
 import { buildActionListButton } from "../componentUtils";
 
 const buildActionButtons = (row, accept, close, del) => {
-  const isCustomer = userInfoRef.value.role === ROLES.Customer;
-
   const acceptButton = buildActionListButton("Accept", () => accept(row));
   const closeButton = buildActionListButton("Close", () => close(row));
   const delButton = buildActionListButton("Delete", () => del(row));
 
   switch (row.status) {
     case ORDER_STATUS.New:
-      return isCustomer ? [delButton] : [acceptButton, closeButton];
+      return isCustomer.value ? [delButton] : [acceptButton, closeButton];
 
     case ORDER_STATUS.InProgress:
-      return isCustomer ? [] : [closeButton];
+      return isCustomer.value ? [] : [closeButton];
 
     default:
       return [];
@@ -43,7 +41,7 @@ const buildActionButtons = (row, accept, close, del) => {
 };
 
 const buildColumns = ({ accept, close, del }) => {
-  return [
+  const columns = [
     {
       title: "Number",
       key: "number",
@@ -61,6 +59,10 @@ const buildColumns = ({ accept, close, del }) => {
       key: "shippingDate",
     },
     {
+      title: "OrderPrice",
+      key: "orderPrice",
+    },
+    {
       title: "Action",
       key: "actions",
       render(row) {
@@ -70,6 +72,8 @@ const buildColumns = ({ accept, close, del }) => {
       },
     },
   ];
+
+  return columns;
 };
 
 const columns = buildColumns({
@@ -79,6 +83,7 @@ const columns = buildColumns({
 });
 
 const message = useMessage();
+
 const handleFilter = async (filterModel) => await getOrders(filterModel);
 const handleAcceptOrder = async (orderId) => {
   const { isOk } = await postAsync(GET_ACCEPT_ORDER_URL(orderId));
@@ -105,7 +110,9 @@ const PAGE_SIZE = 20;
 const page = ref(1);
 const pageCount = ref(0);
 const orders = ref([]);
+
 const userInfoRef = inject("userInfoRef", null);
+const isCustomer = computed(() => userInfoRef.value?.role === ROLES.Customer);
 
 onMounted(async () => await getOrders());
 

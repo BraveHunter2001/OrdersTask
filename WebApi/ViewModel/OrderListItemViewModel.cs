@@ -11,4 +11,5 @@ public class OrderListItemViewModel(Order order)
 
     public string CreateDate { get; set; } = order.OrderDate.ToShortDateString();
     public string? ShippingDate { get; set; } = order.ShipmentDate?.ToShortDateString();
+    public decimal? OrderPrice { get; set; } = order.OrderItems?.Sum(oi=>oi.ItemPrice * oi.ItemsCount);
 }

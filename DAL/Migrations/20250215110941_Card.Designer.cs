@@ -3,6 +3,7 @@ using System;
 using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(OrdersTaskContext))]
-    partial class OrdersTaskContextModelSnapshot : ModelSnapshot
+    [Migration("20250215110941_Card")]
+    partial class Card
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,7 +34,7 @@ namespace DAL.Migrations
             modelBuilder.HasSequence<int>("OrderSequence")
                 .HasMax(2147483647L);
 
-            modelBuilder.Entity("DAL.Entities.Cart", b =>
+            modelBuilder.Entity("DAL.Entities.Card", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -46,10 +49,10 @@ namespace DAL.Migrations
                     b.HasIndex("CustomerId")
                         .IsUnique();
 
-                    b.ToTable("Carts");
+                    b.ToTable("Cards");
                 });
 
-            modelBuilder.Entity("DAL.Entities.CartItem", b =>
+            modelBuilder.Entity("DAL.Entities.CardItem", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -71,7 +74,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("ItemId");
 
-                    b.ToTable("CartItems");
+                    b.ToTable("CardItems");
                 });
 
             modelBuilder.Entity("DAL.Entities.Customer", b =>
@@ -216,20 +219,20 @@ namespace DAL.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("DAL.Entities.Cart", b =>
+            modelBuilder.Entity("DAL.Entities.Card", b =>
                 {
                     b.HasOne("DAL.Entities.Customer", "Customer")
-                        .WithOne("Cart")
-                        .HasForeignKey("DAL.Entities.Cart", "CustomerId")
+                        .WithOne("Card")
+                        .HasForeignKey("DAL.Entities.Card", "CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Customer");
                 });
 
-            modelBuilder.Entity("DAL.Entities.CartItem", b =>
+            modelBuilder.Entity("DAL.Entities.CardItem", b =>
                 {
-                    b.HasOne("DAL.Entities.Cart", "Cart")
+                    b.HasOne("DAL.Entities.Card", "Card")
                         .WithMany("Items")
                         .HasForeignKey("CardId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -241,7 +244,7 @@ namespace DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Cart");
+                    b.Navigation("Card");
 
                     b.Navigation("Item");
                 });
@@ -287,14 +290,14 @@ namespace DAL.Migrations
                     b.Navigation("Order");
                 });
 
-            modelBuilder.Entity("DAL.Entities.Cart", b =>
+            modelBuilder.Entity("DAL.Entities.Card", b =>
                 {
                     b.Navigation("Items");
                 });
 
             modelBuilder.Entity("DAL.Entities.Customer", b =>
                 {
-                    b.Navigation("Cart")
+                    b.Navigation("Card")
                         .IsRequired();
                 });
 

@@ -23,6 +23,7 @@ internal class OrderRepository(OrdersTaskContext context) : Repository<Order>(co
     public PaginatedContainer<List<Order>> GetPaginatedOrderList(OrderListFilter filter)
     {
         var query = context.Orders
+            .Include(o=>o.OrderItems)
             .AsNoTracking()
             .Where(o => (!filter.Status.HasValue || o.Status == filter.Status)
                         && (!filter.CustomerId.HasValue || o.CustomerId == filter.CustomerId))

@@ -14,23 +14,21 @@ namespace WebApi.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 public class OrdersController(
-    IUserService userService,
     IOrderService orderService,
-    IValidator<CreationOrderDto> creationOrderDtoValidator) : ControllerBase
+    IValidator<CreatingOrderDto> creationOrderDtoValidator) : ControllerBase
 {
     [HttpPost]
     [Authorize(Roles = nameof(UserRole.Customer))]
-    public IActionResult CreateOrder([FromBody] CreationOrderDto creationOrderDto)
+    public IActionResult CreateOrder([FromBody] CreatingOrderDto creationOrderDto)
     {
         var validationResult = creationOrderDtoValidator.ValidateModel(creationOrderDto);
         if (validationResult is not null) return validationResult;
 
-        var userId = HttpContext.GetAuthorizedUserId();
-        User user = userService.GetUserById(userId)!;
-        //Todo fix
-        var order = orderService.CreateOrder(user.Customer, creationOrderDto);
+        User user = HttpContext.GetAuthorizedUser(false, true);
 
-        return Ok(new { order.Id, order.Status });
+        orderService.CreateOrder(user.Customer, creationOrderDto);
+
+        return Ok();
     }
 
     [HttpPost("{id}/accept")]
@@ -64,7 +62,8 @@ public class OrdersController(
         Order? order = orderService.GetSimpleOrderById(id);
         if (order is null) return NotFound();
 
-        if (order.CustomerId != HttpContext.GetAuthorizedUserId())
+        User user = HttpContext.GetAuthorizedUser();
+        if (order.CustomerId != user.Customer.Id)
             return Forbid("You are not the owner of the order");
 
         if (!orderService.TryDeleteOrder(order))
@@ -79,7 +78,8 @@ public class OrdersController(
     {
         if (HttpContext.GetAuthorizedUserRole() == UserRole.Customer)
         {
-            filter.CustomerId = HttpContext.GetAuthorizedUserId();
+            User user = HttpContext.GetAuthorizedUser();
+            filter.CustomerId = user.Customer.Id;
         }
 
         var paginatedList = orderService.GetPaginatedOrderList(filter);

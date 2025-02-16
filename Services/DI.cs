@@ -8,6 +8,7 @@ public static class DI
     {
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IItemService, ItemService>();
-        services.AddScoped<IOrderService, OrderServices>();
+        services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<ICartService, CartService>();
     }
 }
