@@ -63,6 +63,10 @@ const buildColumns = ({ accept, close, del }) => {
       key: "orderPrice",
     },
     {
+      title: "OrderPriceWithDiscount",
+      key: "orderPriceWithDiscount",
+    },
+    {
       title: "Action",
       key: "actions",
       render(row) {
